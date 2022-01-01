@@ -38,5 +38,3 @@ class Dataset():
 
         self.input = self.dataset.drop("out", axis=1)
         self.out = self.dataset[["out"]]
-
-print(Dataset(path="dataset/banana.dat").dataset)
