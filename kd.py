@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from dataset import *
 
 class kd():
     def __init__(self, data):
