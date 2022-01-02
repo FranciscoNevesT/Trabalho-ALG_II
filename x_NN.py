@@ -7,7 +7,7 @@ from multiprocessing import Pool
 
 class x_NN():
     def fit(self, path,test_size=0.3):
-        data = Dataset(path = path).dataset
+        data = Dataset(path = path).dataset[:100]
 
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(data.drop("out", 1),
                                                                                 data["out"], test_size=test_size)
@@ -87,9 +87,6 @@ class x_NN():
         return kneighbor
 
     def knn(self, k_size, cpu = -1):
-
-        start = time.time()
-
         self.k_size = k_size
 
         if cpu == -1:
@@ -101,16 +98,61 @@ class x_NN():
             for i in self.X_test.values:
                 predicts.append(self.multi_knn(point= i))
 
-        accuracy = []
+        return predicts
 
-        ii = 0
-        for i in self.X_test.index:
-            y_original = self.y_test[i]
-            y_predict = self.define_class(kneighbors=predicts[ii])
+    def evaluate_aux(self, c, pred):
+        obj = self.y_test.values
 
-            accuracy.append(int(y_original == y_predict))
-            ii += 1
+        tp = 0
+        fp = 0
+        tn = 0
+        fn = 0
 
-        print("--- %s seconds ---" % (time.time() - start))
+        for i in range(len(obj)):
+            y = obj[i]
+            y_pred = pred[i]
 
-        return np.mean(accuracy)
+            if y == c:
+                if y == y_pred:
+                    tp += 1
+                else:
+                    fp += 1
+            else:
+                if y == y_pred:
+                    tn += 1
+                else:
+                    fn += 1
+
+        return [tp,tn,fp,fn]
+
+
+    def evaluate(self, k_size, cpu = -1):
+        metrics = {"acuracia": -1, "revocacao": -1, "precicao": -1}
+
+        tp = 0
+        tn = 0
+        fp = 0
+        fn = 0
+
+        pred = self.knn(k_size=k_size, cpu=cpu)
+
+        classes_pred = []
+
+        for i in pred:
+            classes_pred.append(self.define_class(kneighbors=i))
+
+        classes = self.y_test.unique()
+
+        for c in classes:
+            tp_i,tn_i,fp_i,fn_i = self.evaluate_aux(c = c, pred= classes_pred)
+
+            tp += tp_i
+            tn += tn_i
+            fp += fp_i
+            fn += fn_i
+
+        metrics["acuracia"] = (tp + tn) /(tp + tn + fp + fn)
+        metrics["precicao"] = (tp) / (tp + fp)
+        metrics["revocacao"] = (tp) / (tp + fn)
+
+        return metrics
