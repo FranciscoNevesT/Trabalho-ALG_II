@@ -129,11 +129,6 @@ class x_NN():
     def evaluate(self, k_size, cpu = -1):
         metrics = {"acuracia": -1, "revocacao": -1, "precicao": -1}
 
-        tp = 0
-        tn = 0
-        fp = 0
-        fn = 0
-
         pred = self.knn(k_size=k_size, cpu=cpu)
 
         classes_pred = []
@@ -141,15 +136,9 @@ class x_NN():
         for i in pred:
             classes_pred.append(self.define_class(kneighbors=i))
 
-        classes = self.y_test.unique()
+        classe = self.y_test.value_counts().index[0]
 
-        for c in classes:
-            tp_i,tn_i,fp_i,fn_i = self.evaluate_aux(c = c, pred= classes_pred)
-
-            tp += tp_i
-            tn += tn_i
-            fp += fp_i
-            fn += fn_i
+        tp,tn,fp,fn = self.evaluate_aux(c = classe, pred= classes_pred)
 
         metrics["acuracia"] = (tp + tn) /(tp + tn + fp + fn)
         metrics["precicao"] = (tp) / (tp + fp)
