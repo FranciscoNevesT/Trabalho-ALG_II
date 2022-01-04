@@ -7,7 +7,7 @@ from multiprocessing import Pool
 
 class x_NN():
     def fit(self, path,test_size=0.3):
-        data = Dataset(path = path).dataset[:100]
+        data = Dataset(path = path).dataset
 
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(data.drop("out", 1),
                                                                                 data["out"], test_size=test_size)
@@ -15,9 +15,7 @@ class x_NN():
         self.kd_tree = kd(self.X_train)
 
     def knn_aux(self, tree, point, k_size, kneighbor, maior_distancia, check, dists):
-        if tree == None:
-            1 + 1
-        elif type(tree["POINT"]) == type(np.array([])):
+        if type(tree["POINT"]) == type(np.array([])):
             dist = np.linalg.norm(point - tree["POINT"])
 
             if len(kneighbor) < k_size:

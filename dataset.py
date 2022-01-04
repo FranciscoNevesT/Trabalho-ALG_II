@@ -1,13 +1,33 @@
 import pandas as pd
 
 class Dataset():
-    def __init__(self, path):
+    """ Classe para automaticamente formatar os arquivos
+
+    Parameters:
+        path : string
+          Caminho para o arquivo .dat
+
+    Attributes:
+        sumario : dict
+          Todas as informações contidas no arquivo
+        dataset : pd.Dataframe
+          Valores das instacias com out sendo a classe
+        indexador : dict
+          Indexa os numeros com as classes originais
+    """
+    def __init__(self, path : str):
+        """
+        Abre o arquivo .dat e cria o sumario das suas informações
+
+        :param path: caminho para o arquivo .dat
+        """
+
         with open(path, "r") as file:
-            self.text = file.read().split("@")[1:]
+            text = file.read().split("@")[1:]
 
-        self.data = {}
+        self.sumario = {}
 
-        for i in self.text:
+        for i in text:
             description = i.split()[0]
             value = i.split()[1:]
 
@@ -15,26 +35,40 @@ class Dataset():
                 description = value[0]
                 value = value[1:]
 
-            self.data[description] = value
+            self.sumario[description] = value
 
-        self.create_dataset()
+        self._create_dataset()
 
-    def create_dataset(self):
+    def _create_dataset(self):
+        """
+        Cria um pd.Dataframe dos pontos
+        """
 
-        values = []
+        #Pegando os pontos
+        pontos = []
 
-        for i in self.data["data"]:
-            value = i.split(",")
+        for p in self.sumario["data"]:
+            ponto = p.split(",")
 
-            value = [float(ii) for ii in value]
+            ponto = [float(i) for i in ponto]
 
-            values.append(value)
+            pontos.append(ponto)
 
-        numbers_i = [i for i in range(len(self.data["inputs"]))]
+        #Criando o dataset
+        dimensions = [i for i in range(len(self.sumario["inputs"]))]
 
-        self.dataset = pd.DataFrame(values, columns=numbers_i + ["out"])
+        dimensions.append("out")
 
-        self.dataset["out"], _ = pd.factorize(self.dataset["out"])
+        self.dataset = pd.DataFrame(pontos, columns=dimensions)
 
-        self.input = self.dataset.drop("out", axis=1)
-        self.out = self.dataset[["out"]]
+
+
+        #Convertendo os valores das classes para numerico
+        self.dataset["out"], classes = pd.factorize(self.dataset["out"])
+        self.dataset["out"] = [int(i) for i in self.dataset["out"].values]
+
+        #fazendo o indexador
+        self.indexador = {}
+
+        for i in range(len(classes)):
+            self.indexador[i] = classes[i]
