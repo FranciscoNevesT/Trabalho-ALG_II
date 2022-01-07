@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from dataset import *
 
 class kd():
     """ Classe que representa a arovre kd
@@ -39,7 +40,7 @@ class kd():
             Parameters:
                 tree : dict
                   Arvore KD
-                point : list
+                point : np.array
                   Ponto a ser inserido
                 n_dim : int
                   O numero de dimensões de Ponto
@@ -85,7 +86,7 @@ class kd():
         """ Função que cria a arvore
 
             Parameters:
-                data : pd.DataFrame
+                data : np.array
                   Dataset criado por dataset.py
             Descrição:
                 .Cria um nó cotendo o primeiro ponto
@@ -93,11 +94,11 @@ class kd():
         """
 
         kd_tree = self.create_node()
-        kd_tree["POINT"] = data.values[0]
+        kd_tree["POINT"] = data[0]
         kd_tree["DIM"] = 0
 
-        for point in data.values[1:]:
-            self.insert_kd(kd_tree, point, n_dim=2)
+        for point in data[1:]:
+            self.insert_kd(kd_tree, point, n_dim=len(point))
 
         return kd_tree
 

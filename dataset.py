@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 class Dataset():
     """ Classe para automaticamente formatar os arquivos
@@ -10,8 +11,8 @@ class Dataset():
     Attributes:
         sumario : dict
           Todas as informações contidas no arquivo
-        dataset : pd.Dataframe
-          Valores das instacias com out sendo a classe
+        dataset : np.array
+          Valores das instacias com o ultimo valor sendo a classe
         indexador : dict
           Indexa os numeros com as classes originais
     """
@@ -41,7 +42,7 @@ class Dataset():
 
     def _create_dataset(self):
         """
-        Cria um pd.Dataframe dos pontos
+        Cria um np.array dos pontos
         """
 
         #Pegando os pontos
@@ -72,3 +73,6 @@ class Dataset():
 
         for i in range(len(classes)):
             self.indexador[i] = classes[i]
+
+        self.dataset = self.dataset.values
+
