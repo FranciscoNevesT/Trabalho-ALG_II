@@ -1,16 +1,33 @@
+import numpy as np
 from sklearn.model_selection import train_test_split
 from kd import *
 from dataset import *
-import time
 import multiprocessing
 from multiprocessing import Pool
 
 class x_NN():
     def fit(self, path,test_size=0.3):
-        data = Dataset(path = path).dataset
+        data = Dataset(path = path).dataset[:900]
 
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(data.drop("out", 1),
-                                                                                data["out"], test_size=test_size)
+        self.X_train = data[:,:-1]
+        self.y_train = data[:,-1]
+
+        self.X_test = []
+        self.y_test = []
+
+        split = int(test_size * len(data))
+
+        for _ in range(split):
+            sep = np.random.randint(0,len(self.X_train))
+
+            self.X_test.append(self.X_train[sep])
+            self.y_test.append(self.y_train[sep])
+
+            self.X_train = np.delete(self.X_train, sep , 0)
+            self.y_train = np.delete(self.y_train, sep , 0)
+
+        self.X_test = np.array(self.X_test)
+        self.y_test = np.array(self.y_test)
 
         self.kd_tree = kd(self.X_train)
 
@@ -62,20 +79,33 @@ class x_NN():
                                  kneighbor=kneighbor, maior_distancia=maior_distancia, check=check, dists=dists)
 
     def define_class(self, kneighbors):
-        e = []
+        k_classes = {}
+
         for n in kneighbors:
-            p = self.X_train
-            for dim in range(len(n)):
-                p = p[p[dim] == n[dim]]
+            i = 0
 
-            e.append(self.y_train[p.index[0]])
 
-        contar = pd.DataFrame(e)[0].value_counts()
-        contar = contar[contar == contar.iloc[0]]
+            for p in self.X_train:
+                if (p == n).all():
+                    break
 
-        maiores = contar.index
+                i += 1
 
-        return maiores[np.random.randint(len(maiores))]
+            classe = self.y_train[i]
+            if list(k_classes.keys()).count(classe):
+                k_classes[classe] = k_classes[classe] + 1
+            else:
+                k_classes[classe] = 1
+
+        maior =  np.max(list(k_classes.values()))
+
+        e = []
+
+        for i in k_classes.keys():
+            if k_classes[i] == maior:
+                e.append(i)
+
+        return e[np.random.randint(len(e))]
 
     def multi_knn(self,point):
         kneighbor = []
@@ -90,16 +120,16 @@ class x_NN():
         if cpu == -1:
             with Pool(multiprocessing.cpu_count()) as p:
                 if __name__ == '__main__':
-                    predicts = p.map(self.multi_knn, self.X_test.values)
+                    predicts = p.map(self.multi_knn, self.X_test)
         elif cpu == 1:
             predicts = []
-            for i in self.X_test.values:
+            for i in self.X_test:
                 predicts.append(self.multi_knn(point= i))
 
         return predicts
 
     def evaluate_aux(self, c, pred):
-        obj = self.y_test.values
+        obj = self.y_test
 
         tp = 0
         fp = 0
@@ -129,12 +159,16 @@ class x_NN():
 
         pred = self.knn(k_size=k_size, cpu=cpu)
 
+        print(pred)
+
         classes_pred = []
 
         for i in pred:
             classes_pred.append(self.define_class(kneighbors=i))
 
-        classe = self.y_test.value_counts().index[0]
+
+        classe = np.unique(self.y_test, return_counts= True)
+        classe = classe[0][np.argmax(classe[1])]
 
         tp,tn,fp,fn = self.evaluate_aux(c = classe, pred= classes_pred)
 
