@@ -45,21 +45,21 @@ class Dataset():
         """
 
         #Pegando os pontos
-        pontos = []
+        points = []
 
         for p in self.sumario["data"]:
-            ponto = p.split(",")
+            point = p.split(",")
 
-            ponto = [float(i) for i in ponto]
+            point = [float(i) for i in point]
 
-            pontos.append(ponto)
+            points.append(point)
 
         #Criando o dataset
         dimensions = [i for i in range(len(self.sumario["inputs"]))]
 
         dimensions.append("out")
 
-        self.dataset = pd.DataFrame(pontos, columns=dimensions)
+        self.dataset = pd.DataFrame(points, columns=dimensions)
 
 
 
