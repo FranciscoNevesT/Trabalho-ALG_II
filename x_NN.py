@@ -7,7 +7,7 @@ from multiprocessing import Pool
 
 class x_NN():
     def fit(self, path,test_size=0.3):
-        data = Dataset(path = path).dataset[:900]
+        data = Dataset(path = path).dataset[:100]
 
         self.X_train = data[:,:-1]
         self.y_train = data[:,-1]
@@ -84,7 +84,6 @@ class x_NN():
         for n in kneighbors:
             i = 0
 
-
             for p in self.X_train:
                 if (p == n).all():
                     break
@@ -119,8 +118,7 @@ class x_NN():
 
         if cpu == -1:
             with Pool(multiprocessing.cpu_count()) as p:
-                if __name__ == '__main__':
-                    predicts = p.map(self.multi_knn, self.X_test)
+                predicts = p.map(self.multi_knn, self.X_test)
         elif cpu == 1:
             predicts = []
             for i in self.X_test:
@@ -154,17 +152,20 @@ class x_NN():
         return [tp,tn,fp,fn]
 
 
-    def evaluate(self, k_size, cpu = -1):
-        metrics = {"acuracia": -1, "revocacao": -1, "precicao": -1}
-
+    def predict(self, k_size, cpu):
         pred = self.knn(k_size=k_size, cpu=cpu)
-
-        print(pred)
 
         classes_pred = []
 
         for i in pred:
             classes_pred.append(self.define_class(kneighbors=i))
+
+        return classes_pred
+
+    def evaluate(self, k_size, cpu = -1):
+        metrics = {"acuracia": -1, "revocacao": -1, "precicao": -1}
+
+        classes_pred = self.predict(k_size = k_size, cpu = cpu)
 
 
         classe = np.unique(self.y_test, return_counts= True)

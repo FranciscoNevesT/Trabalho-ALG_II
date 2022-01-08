@@ -28,13 +28,13 @@ class Dataset():
 
         self.sumario = {}
 
+        data_v = False
         for i in text:
-            description = i.split()[0]
-            value = i.split()[1:]
+            description = i.split("\n")[0]
+            value = i.split("\n")[1:]
 
-            if description == "attribute":
-                description = value[0]
-                value = value[1:]
+            if description != "data":
+                continue
 
             self.sumario[description] = value
 
@@ -50,19 +50,24 @@ class Dataset():
 
         for p in self.sumario["data"]:
             point = p.split(",")
+            point = " ".join(point)
+            point = point.split()
 
-            point = [float(i) for i in point]
+            point_v = []
 
-            points.append(point)
+            for i in point:
+                try:
+                    point_v.append(float(i))
+                except:
+                    point_v.append(i)
+
+            points.append(point_v)
 
         #Criando o dataset
-        dimensions = [i for i in range(len(self.sumario["inputs"]))]
-
-        dimensions.append("out")
-
-        self.dataset = pd.DataFrame(points, columns=dimensions)
-
-
+        columns = [i for i in range(len(points[0]) - 1)]
+        columns.append("out")
+        self.dataset = pd.DataFrame(points, columns= columns)
+        self.dataset.dropna(inplace=True)
 
         #Convertendo os valores das classes para numerico
         self.dataset["out"], classes = pd.factorize(self.dataset["out"])
@@ -75,4 +80,6 @@ class Dataset():
             self.indexador[i] = classes[i]
 
         self.dataset = self.dataset.values
+
+
 
