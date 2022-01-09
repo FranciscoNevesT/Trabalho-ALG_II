@@ -20,7 +20,7 @@ fig.suptitle("Avaliação dos datasets")
 
 plt.style.use('seaborn-colorblind')
 
-k_size = [1,2,4,6,8,10]
+k_size = range(1,10,2)
 
 model = x_NN()
 a = 0

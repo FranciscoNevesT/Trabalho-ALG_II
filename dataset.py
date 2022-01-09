@@ -10,7 +10,7 @@ class Dataset():
 
     Attributes:
         sumario : dict
-          Todas as informações contidas no arquivo
+          Todos os pontos do dataset
         dataset : np.array
           Valores das instacias com o ultimo valor sendo a classe
         indexador : dict

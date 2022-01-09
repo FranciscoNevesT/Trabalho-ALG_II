@@ -44,13 +44,6 @@ class kd():
                   Ponto a ser inserido
                 n_dim : int
                   O numero de dimensões de Ponto
-
-            Descrição:
-                .Olha se a arvore é uma folha (tree["CORTE"] == None)
-                    Se for, tire a mediana do ponto original com point e aloque cada um em um nó, depois adicione os
-                    nós no local devido
-                    Se não, veja se point[dim] é menor ou maior que o corte, e repita o proceso na parte da qual ele
-                    pertence
         """
 
         dim = tree["DIM"]
@@ -88,9 +81,6 @@ class kd():
             Parameters:
                 data : np.array
                   Dataset criado por dataset.py
-            Descrição:
-                .Cria um nó cotendo o primeiro ponto
-                .Utilizando a função insert_kd, insere o restante dos pontos
         """
 
         kd_tree = self.create_node()
