@@ -1,17 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from dataset import *
 
-class kd():
+class KD:
     """ Classe que representa a arovre kd
 
         Parameters:
-            data : pd.DataFrame
+            data : np.array
               Dataset criado por dataset.py
 
 
         Attributes:
-            sumario : dict
+            self.kd_tree : dict
+              Arvore kd criada usando os pontos de data
         """
 
     def __init__(self, data):
@@ -48,7 +48,7 @@ class kd():
 
         dim = tree["DIM"]
 
-        if tree["CORTE"] == None:
+        if isinstance(tree["CORTE"], type(None)):  # Caso a arvore seja uma folha
             l_tree = self.create_node()
             l_tree["DIM"] = (dim + 1) % n_dim
             r_tree = self.create_node()
@@ -83,6 +83,7 @@ class kd():
                   Dataset criado por dataset.py
         """
 
+        # Inserindo todos os pontos
         kd_tree = self.create_node()
         kd_tree["POINT"] = data[0]
         kd_tree["DIM"] = 0
@@ -99,9 +100,9 @@ class kd():
         return self._get_deep_aux(self.kd_tree)
 
     def _get_deep_aux(self, tree):
-        if tree == None:
+        if isinstance(tree, type(None)):
             return 0
-        elif type(tree["POINT"]) == type(np.array([])):
+        elif isinstance(tree["POINT"], type(np.array([]))):
             return 1
         else:
             return 1 + max(self._get_deep_aux(tree["MENOR"]), self._get_deep_aux(tree["MAIOR"]))
@@ -109,6 +110,7 @@ class kd():
     def lines(self):
         """
         Junto com _lines_aux, desenha todas as linhas de separação
+        Obs: Só funciona em duas dimensões
         """
         plt.figure(figsize=(10, 10))
         self._lines_aux(self.kd_tree)
@@ -117,7 +119,7 @@ class kd():
         corte = tree["CORTE"]
         dim = tree["DIM"]
 
-        if type(tree["POINT"]) == type(None):
+        if isinstance(tree["POINT"], type(None)):
             if dim == 0:
                 a = bounds[1][0]
                 b = bounds[1][1]
@@ -134,8 +136,8 @@ class kd():
                 lbound = [[bounds[0][0], bounds[0][1]], [bounds[1][0], corte]]
                 rbound = [[bounds[0][0], bounds[0][1]], [corte, bounds[1][1]]]
 
-            if type(tree["MENOR"]) != type(None):
+            if isinstance(tree["MENOR"], type(None)):
                 self._lines_aux(tree=tree["MENOR"], bounds=lbound)
 
-            if type(tree["MAIOR"]) != type(None):
+            if isinstance(tree["MAIOR"], type(None)):
                 self._lines_aux(tree=tree["MAIOR"], bounds=rbound)

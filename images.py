@@ -1,16 +1,15 @@
-import matplotlib.pyplot as plt
 import os
-import numpy
-from x_NN import *
+from X_nn import *
 
+# Configuração do plot
 i = 3
 j = 4
 
-fig, ax = plt.subplots(i,j)
+fig, ax = plt.subplots(i, j)
 
-plt.rcParams['figure.figsize']  = (16, 10)
-plt.rcParams['axes.labelsize']  = 20
-plt.rcParams['axes.titlesize']  = 10
+plt.rcParams['figure.figsize'] = (16, 10)
+plt.rcParams['axes.labelsize'] = 20
+plt.rcParams['axes.titlesize'] = 10
 plt.rcParams['xtick.labelsize'] = 20
 plt.rcParams['ytick.labelsize'] = 20
 plt.rcParams['lines.linewidth'] = 4
@@ -20,12 +19,11 @@ fig.suptitle("Avaliação dos datasets")
 
 plt.style.use('seaborn-colorblind')
 
-k_size = range(1,10,2)
+k_size = range(1, 10, 2)
 
-model = x_NN()
+model = X_nn()
 a = 0
 b = 0
-
 
 
 acuracia_global = {}
@@ -37,8 +35,9 @@ for k in k_size:
     revocacao_global[k] = []
     precicao_global[k] = []
 
+# Plotando as metricas para cada dataset com cada k_size
 for file in os.listdir("dataset"):
-    model.fit(path= "dataset/" + file)
+    model.fit(path="dataset/" + file)
 
     acuracia = []
     revocacao = []
@@ -46,7 +45,7 @@ for file in os.listdir("dataset"):
 
     for k in k_size:
         if __name__ == '__main__':
-            dados = model.evaluate(k_size=k,cpu = 1)
+            dados = model.evaluate(k_size=k, cpu=1)
 
             acuracia.append([dados["acuracia"]])
             acuracia_global[k].append(dados["acuracia"])
@@ -58,10 +57,10 @@ for file in os.listdir("dataset"):
             precicao_global[k].append(dados["precicao"])
 
     ax[a][b].set_title(file)
-    ax[a][b].plot(k_size,acuracia, label = "acuracia")
-    ax[a][b].plot(k_size,revocacao, label = "revocacao")
-    ax[a][b].plot(k_size,precicao, label = "precicao")
-    ax[a][b].set_ylim([0,1.1])
+    ax[a][b].plot(k_size, acuracia, label="acuracia")
+    ax[a][b].plot(k_size, revocacao, label="revocacao")
+    ax[a][b].plot(k_size, precicao, label="precicao")
+    ax[a][b].set_ylim([0, 1.1])
 
     a += 1
     if a == i:
@@ -71,16 +70,18 @@ for file in os.listdir("dataset"):
 plt.legend()
 plt.show()
 
+# Calculando e plotando o media das metricas
+
 for k in k_size:
     acuracia_global[k] = np.mean(acuracia_global[k])
     revocacao_global[k] = np.mean(revocacao_global[k])
     precicao_global[k] = np.mean(precicao_global[k])
 
-plt.title("Media das ?")
-plt.plot(acuracia_global.keys(),acuracia_global.values(), label = "acuracia")
-plt.plot(revocacao_global.keys(),revocacao_global.values(), label = "revocacao")
-plt.plot(precicao_global.keys(),precicao_global.values(), label = "precicao")
-plt.ylim([0,1.1])
+plt.title("Media das metricas")
+plt.plot(acuracia_global.keys(), acuracia_global.values(), label="acuracia")
+plt.plot(revocacao_global.keys(), revocacao_global.values(), label="revocacao")
+plt.plot(precicao_global.keys(), precicao_global.values(), label="precicao")
+plt.ylim([0, 1.1])
 plt.legend()
 plt.show()
 

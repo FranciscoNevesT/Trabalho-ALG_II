@@ -1,7 +1,6 @@
 import pandas as pd
-import numpy as np
 
-class Dataset():
+class Dataset:
     """ Classe para automaticamente formatar os arquivos
 
     Parameters:
@@ -16,7 +15,7 @@ class Dataset():
         indexador : dict
           Indexa os numeros com as classes originais
     """
-    def __init__(self, path : str):
+    def __init__(self, path: str):
         """
         Abre o arquivo .dat e cria o sumario das suas informações
 
@@ -28,7 +27,7 @@ class Dataset():
 
         self.sumario = {}
 
-        data_v = False
+        # Coletando os dados do arquivo
         for i in text:
             description = i.split("\n")[0]
             value = i.split("\n")[1:]
@@ -45,7 +44,7 @@ class Dataset():
         Cria um np.array dos pontos
         """
 
-        #Pegando os pontos
+        # Pegando os pontos
         points = []
 
         for p in self.sumario["data"]:
@@ -63,23 +62,20 @@ class Dataset():
 
             points.append(point_v)
 
-        #Criando o dataset
+        # Criando o dataset
         columns = [i for i in range(len(points[0]) - 1)]
         columns.append("out")
-        self.dataset = pd.DataFrame(points, columns= columns)
+        self.dataset = pd.DataFrame(points, columns=columns)
         self.dataset.dropna(inplace=True)
 
-        #Convertendo os valores das classes para numerico
+        # Convertendo os valores das classes para numerico
         self.dataset["out"], classes = pd.factorize(self.dataset["out"])
         self.dataset["out"] = [int(i) for i in self.dataset["out"].values]
 
-        #fazendo o indexador
+        # Fazendo o indexador
         self.indexador = {}
 
         for i in range(len(classes)):
             self.indexador[i] = classes[i]
 
         self.dataset = self.dataset.values
-
-
-

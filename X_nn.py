@@ -5,7 +5,7 @@ from dataset import *
 import multiprocessing
 from multiprocessing import Pool
 
-class x_NN():
+class X_nn:
     """ Classe que representa um modelo de classificação kneighbors
 
         Attributes:
@@ -25,7 +25,7 @@ class x_NN():
               Uma kd_tree com os dados de treinamento
         """
 
-    def fit(self, path,test_size=0.3):
+    def fit(self, path, test_size=0.3):
         """ Função que separa os conjuntos de treino e teste e cria a arvore kd
 
             Parameters:
@@ -35,31 +35,33 @@ class x_NN():
                 test_size : int, default = 0.3
                   Proporção do conjunto de teste em relação à todos od dados
         """
-        data = Dataset(path = path).dataset[:200]
+        data = Dataset(path=path).dataset[:200]
 
-        self.X_train = data[:,:-1]
-        self.y_train = data[:,-1]
+        self.X_train = data[:, :-1]
+        self.y_train = data[:, -1]
 
         self.X_test = []
         self.y_test = []
 
+        # Separando em treino e teste
         split = int(test_size * len(data))
 
         for _ in range(split):
-            sep = np.random.randint(0,len(self.X_train))
+            sep = np.random.randint(0, len(self.X_train))
 
             self.X_test.append(self.X_train[sep])
             self.y_test.append(self.y_train[sep])
 
-            self.X_train = np.delete(self.X_train, sep , 0)
-            self.y_train = np.delete(self.y_train, sep , 0)
+            self.X_train = np.delete(self.X_train, sep, 0)
+            self.y_train = np.delete(self.y_train, sep, 0)
 
         self.X_test = np.array(self.X_test)
         self.y_test = np.array(self.y_test)
 
-        self.kd_tree = kd(self.X_train)
+        # Montando a arvore
+        self.kd_tree = KD(self.X_train)
 
-    def knn(self, k_size, cpu = -1):
+    def knn(self, k_size, cpu=-1):
         """ Função que encontra os k_size pontos mais proximos de todos os ponto em self.X_test.
 
             Parameters:
@@ -82,14 +84,14 @@ class x_NN():
         elif cpu == 1 or cpu == 0:
             predicts = []
             for i in self.X_test:
-                predicts.append(self.multi_knn(point= i))
+                predicts.append(self.multi_knn(point=i))
         else:
             with Pool(cpu) as p:
                 predicts = p.map(self.multi_knn, self.X_test)
 
         return predicts
 
-    def multi_knn(self,point):
+    def multi_knn(self, point):
         """ Função intermediaria para ser possivel utilizar o multiprocessing.
                 Parameters:
                     point : np.array
@@ -101,8 +103,8 @@ class x_NN():
 
                 """
         kneighbor = []
-        self.knn_aux(point = point, tree= self.kd_tree.kd_tree, k_size= self.k_size, kneighbor= kneighbor,
-                     maior_distancia=[-1,-1], check= [0], dists=[])
+        self.knn_aux(point=point, tree=self.kd_tree.kd_tree, k_size=self.k_size, kneighbor=kneighbor,
+                     maior_distancia=[-1, -1], check=[0], dists=[])
 
         return kneighbor
 
@@ -118,24 +120,25 @@ class x_NN():
                       Numero de neighbor a ser localidado
                     kneighbor : list
                       Pontos mais proximos
-                    maior_distancia : int
-                      Maior distanccia do ponto mais longe de point em kneighbor
+                    maior_distancia : list
+                      Maior distanccia do ponto mais longe de point em kneighbor e a sua posição
                     check : list
                       Conta o numero de interações do algoritmo
                     dists : list
                       Lista com as distancias entre o kneighbor e point
                 """
-        if type(tree["POINT"]) == type(np.array([])):
+
+        if type(tree["POINT"], type(np.array([]))):  # Caso seja uma folha
             dist = np.linalg.norm(point - tree["POINT"])
 
-            if len(kneighbor) < k_size:
+            if len(kneighbor) < k_size:  # Se ainda faltar elementos, adicione e, se necessario, atualize a distancia
                 kneighbor.append(tree["POINT"])
                 dists.append(dist)
 
                 if dist > maior_distancia[0]:
                     maior_distancia[0] = dist
                     maior_distancia[1] = len(kneighbor) - 1
-            else:
+            else:  # Se não, veja se a distancia é menor que a maior distancia e, se necessariom atulize os dados
                 if dist < maior_distancia[0]:
                     tirar = maior_distancia[1]
 
@@ -154,7 +157,7 @@ class x_NN():
 
             dif = abs(corte - point[dim])
 
-            if len(kneighbor) < k_size or dif < maior_distancia[0]:
+            if len(kneighbor) < k_size or dif < maior_distancia[0]:  # Caso não tenha pontos o suficiente ou a distancia do corte não possa ser eliminada
                 menor = tree["MENOR"]
                 self.knn_aux(tree=menor, point=point, k_size=k_size,
                              kneighbor=kneighbor, maior_distancia=maior_distancia, check=check, dists=dists)
@@ -162,6 +165,7 @@ class x_NN():
                 self.knn_aux(tree=maior, point=point, k_size=k_size,
                              kneighbor=kneighbor, maior_distancia=maior_distancia, check=check, dists=dists)
             else:
+                # Confira qual lado o ponto está
                 if point[dim] < corte:
                     menor = tree["MENOR"]
                     self.knn_aux(tree=menor, point=point, k_size=k_size,
@@ -200,7 +204,7 @@ class x_NN():
             else:
                 k_classes[classe] = 1
 
-        maior =  np.max(list(k_classes.values()))
+        maior = np.max(list(k_classes.values()))
 
         classe_pred = []
 
@@ -235,7 +239,7 @@ class x_NN():
 
         return classes_pred
 
-    def evaluate(self, k_size, cpu = -1):
+    def evaluate(self, k_size, cpu=-1):
         """ Função que calcula as metricas de acerto
 
                 Parameters:
@@ -252,15 +256,15 @@ class x_NN():
                 """
         metrics = {"acuracia": -1, "revocacao": -1, "precicao": -1}
 
-        classes_pred = self.predict(k_size = k_size, cpu = cpu)
+        classes_pred = self.predict(k_size=k_size, cpu=cpu)
 
 
-        classe = np.unique(self.y_test, return_counts= True)
+        classe = np.unique(self.y_test, return_counts=True)
         classe = classe[0][np.argmax(classe[1])]
 
-        tp,tn,fp,fn = self.evaluate_aux(c = classe, pred= classes_pred)
+        tp, tn, fp, fn = self.evaluate_aux(c=classe, pred=classes_pred)
 
-        metrics["acuracia"] = (tp + tn) /(tp + tn + fp + fn)
+        metrics["acuracia"] = (tp + tn) / (tp + tn + fp + fn)
         metrics["precicao"] = (tp) / (tp + fp)
         metrics["revocacao"] = (tp) / (tp + fn)
 
@@ -303,4 +307,4 @@ class x_NN():
                 else:
                     fn += 1
 
-        return [tp,tn,fp,fn]
+        return [tp, tn, fp, fn]
