@@ -1,12 +1,11 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 class KD:
-    """ Classe que representa a arovre kd
+    """ Classe que representa a arvore kd
 
         Parameters:
             data : np.array
-              Dataset criado por dataset.py
+              Conjunto de pontos criado pela classe Dataset
 
 
         Attributes:
@@ -39,11 +38,11 @@ class KD:
 
             Parameters:
                 tree : dict
-                  Arvore KD
+                  Arvore em que point tem que ser inserida
                 point : np.array
                   Ponto a ser inserido
                 n_dim : int
-                  O numero de dimensões de Ponto
+                  O numero de dimensões de point
         """
 
         dim = tree["DIM"]
@@ -64,7 +63,7 @@ class KD:
                 l_tree["POINT"] = point
                 r_tree["POINT"] = p0
 
-            median = np.median([p0[dim], point[[dim]]])[0]
+            median = np.median([p0[dim], point[dim]])
 
             tree["CORTE"] = median
             tree["MENOR"] = l_tree
@@ -92,52 +91,3 @@ class KD:
             self.insert_kd(kd_tree, point, n_dim=len(point))
 
         return kd_tree
-
-    def get_deep(self):
-        """
-        Junto com _get_deep_aux, retorna a profundidade da arvore
-        """
-        return self._get_deep_aux(self.kd_tree)
-
-    def _get_deep_aux(self, tree):
-        if isinstance(tree, type(None)):
-            return 0
-        elif isinstance(tree["POINT"], type(np.array([]))):
-            return 1
-        else:
-            return 1 + max(self._get_deep_aux(tree["MENOR"]), self._get_deep_aux(tree["MAIOR"]))
-
-    def lines(self):
-        """
-        Junto com _lines_aux, desenha todas as linhas de separação
-        Obs: Só funciona em duas dimensões
-        """
-        plt.figure(figsize=(10, 10))
-        self._lines_aux(self.kd_tree)
-
-    def _lines_aux(self, tree, bounds=[[-100, 100], [-100, 100]]):
-        corte = tree["CORTE"]
-        dim = tree["DIM"]
-
-        if isinstance(tree["POINT"], type(None)):
-            if dim == 0:
-                a = bounds[1][0]
-                b = bounds[1][1]
-
-                plt.plot([corte, corte], [a, b], color="r")
-                lbound = [[bounds[0][0], corte], [bounds[1][0], bounds[1][1]]]
-                rbound = [[corte, bounds[0][1]], [bounds[1][0], bounds[1][1]]]
-
-            else:
-                a = bounds[0][0]
-                b = bounds[0][1]
-
-                plt.plot([a, b], [corte, corte], color="r")
-                lbound = [[bounds[0][0], bounds[0][1]], [bounds[1][0], corte]]
-                rbound = [[bounds[0][0], bounds[0][1]], [corte, bounds[1][1]]]
-
-            if isinstance(tree["MENOR"], type(None)):
-                self._lines_aux(tree=tree["MENOR"], bounds=lbound)
-
-            if isinstance(tree["MAIOR"], type(None)):
-                self._lines_aux(tree=tree["MAIOR"], bounds=rbound)

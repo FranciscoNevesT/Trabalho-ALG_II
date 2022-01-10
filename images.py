@@ -1,5 +1,6 @@
 import os
 from X_nn import *
+import matplotlib.pyplot as plt
 
 # Configuração do plot
 i = 3
@@ -84,5 +85,3 @@ plt.plot(precicao_global.keys(), precicao_global.values(), label="precicao")
 plt.ylim([0, 1.1])
 plt.legend()
 plt.show()
-
-print(acuracia_global)

@@ -11,7 +11,7 @@ class Dataset:
         sumario : dict
           Todos os pontos do dataset
         dataset : np.array
-          Valores das instacias com o ultimo valor sendo a classe
+          Conjunto de todos os pontos junto com o as suas classes. O ultimo valor de cada ponto é a sua classe
         indexador : dict
           Indexa os numeros com as classes originais
     """

@@ -30,12 +30,12 @@ class X_nn:
 
             Parameters:
                 path : string
-                  Local aonde está o dataset
+                  Diretorio aonde está o dataset
 
                 test_size : int, default = 0.3
                   Proporção do conjunto de teste em relação à todos od dados
         """
-        data = Dataset(path=path).dataset[:200]
+        data = Dataset(path=path).dataset
 
         self.X_train = data[:, :-1]
         self.y_train = data[:, -1]
@@ -121,14 +121,14 @@ class X_nn:
                     kneighbor : list
                       Pontos mais proximos
                     maior_distancia : list
-                      Maior distanccia do ponto mais longe de point em kneighbor e a sua posição
+                      Maior distancia do ponto mais longe de point em kneighbor e a sua posição
                     check : list
-                      Conta o numero de interações do algoritmo
+                      Numero de pontos testados pelo algoritmo
                     dists : list
                       Lista com as distancias entre o kneighbor e point
                 """
 
-        if type(tree["POINT"], type(np.array([]))):  # Caso seja uma folha
+        if isinstance(tree["POINT"], type(np.array([]))):  # Caso seja uma folha
             dist = np.linalg.norm(point - tree["POINT"])
 
             if len(kneighbor) < k_size:  # Se ainda faltar elementos, adicione e, se necessario, atualize a distancia
@@ -138,14 +138,13 @@ class X_nn:
                 if dist > maior_distancia[0]:
                     maior_distancia[0] = dist
                     maior_distancia[1] = len(kneighbor) - 1
-            else:  # Se não, veja se a distancia é menor que a maior distancia e, se necessariom atulize os dados
+            else:  # Se não, veja se a distancia é menor que a maior distancia e, se necessariom atualize os dados
                 if dist < maior_distancia[0]:
                     tirar = maior_distancia[1]
 
-                    kneighbor.pop(tirar)
-                    kneighbor.append(tree["POINT"])
-
+                    kneighbor[tirar] = tree["POINT"]
                     dists[tirar] = dist
+
                     maior_distancia[0] = np.max(dists)
                     maior_distancia[1] = np.argmax(dists)
 
@@ -259,10 +258,10 @@ class X_nn:
         classes_pred = self.predict(k_size=k_size, cpu=cpu)
 
 
-        classe = np.unique(self.y_test, return_counts=True)
-        classe = classe[0][np.argmax(classe[1])]
+        c = np.unique(self.y_test, return_counts=True)
+        c = c[0][np.argmax(c[1])]
 
-        tp, tn, fp, fn = self.evaluate_aux(c=classe, pred=classes_pred)
+        tp, tn, fp, fn = self.evaluate_aux(c=c, pred=classes_pred)
 
         metrics["acuracia"] = (tp + tn) / (tp + tn + fp + fn)
         metrics["precicao"] = (tp) / (tp + fp)
@@ -282,7 +281,7 @@ class X_nn:
 
                  Return:
                     [tp,tn,fp,fn] : list
-                      Valores de true_positives(tp), true_negatives(tn), false_positives(fp) e false_negatives(fp)
+                      Valores de true_positives(tp), true_negatives(tn), false_positives(fp) e false_negatives(fn)
 
                 """
         obj = self.y_test
